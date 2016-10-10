@@ -21,8 +21,10 @@
 
 package de.appplant.cordova.emailcomposer;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -40,6 +42,9 @@ import java.util.List;
 @SuppressWarnings("Convert2Diamond")
 public class EmailComposer extends CordovaPlugin {
 
+    private static final int IS_AVAILABEL_REQUEST_CODE = 0;
+    private static final String GET_ACCOUNTS = Manifest.permission.GET_ACCOUNTS;
+    
     /**
      * The log tag for this plugin
      */
@@ -50,6 +55,9 @@ public class EmailComposer extends CordovaPlugin {
 
     // The callback context used when calling back into JavaScript
     private CallbackContext command;
+
+    // The exec() arguments in JSON form.
+    private JSONArray args;
 
     /**
      * Delete externalCacheDirectory on appstart
@@ -84,6 +92,7 @@ public class EmailComposer extends CordovaPlugin {
                             CallbackContext callback) throws JSONException {
 
         this.command = callback;
+        this.args = args;
 
         if ("open".equalsIgnoreCase(action)) {
             open(args);
@@ -91,8 +100,13 @@ public class EmailComposer extends CordovaPlugin {
         }
 
         if ("isAvailable".equalsIgnoreCase(action)) {
-            isAvailable(args.getString(0));
-            return true;
+            if(cordova.hasPermission(GET_ACCOUNTS)) {
+                isAvailable(args.getString(0));
+                return true;
+            } else {
+                cordova.requestPermission(this, IS_AVAILABEL_REQUEST_CODE, GET_ACCOUNTS);
+                return true;
+            }
         }
 
         return false;
@@ -143,9 +157,8 @@ public class EmailComposer extends CordovaPlugin {
         }
 
         Intent draft  = impl.getDraftWithProperties(props, getContext());
-        String header = props.optString("chooserHeader", "Open with");
-
-        final Intent chooser = Intent.createChooser(draft, header);
+        
+        final Intent chooser = Intent.createChooser(draft, null);
         final EmailComposer plugin = this;
 
         cordova.getThreadPool().execute(new Runnable() {
@@ -173,4 +186,22 @@ public class EmailComposer extends CordovaPlugin {
         }
     }
 
+    @Override
+    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
+        // https://developer.android.com/training/permissions/requesting.html
+        // https://cordova.apache.org/docs/en/latest/guide/platforms/android/plugin.html
+
+        for(int r:grantResults) {
+            if(r == PackageManager.PERMISSION_DENIED) {
+                command.sendPluginResult(new PluginResult(PluginResult.Status.ERROR));
+                return;
+            }
+        }
+
+        switch(requestCode) {
+            case IS_AVAILABEL_REQUEST_CODE:
+                isAvailable(args.getString(0));
+            break;
+        }
+    }
 }
