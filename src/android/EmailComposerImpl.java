@@ -23,18 +23,23 @@
 
 package de.appplant.cordova.emailcomposer;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
 
+import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,7 +75,7 @@ public class EmailComposerImpl {
      * The application context.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void cleanupAttachmentFolder (Context ctx) {
+    public void cleanupAttachmentFolder(Context ctx) {
         try {
             File dir = new File(ctx.getExternalCacheDir() + ATTACHMENT_FOLDER);
 
@@ -79,8 +84,10 @@ public class EmailComposerImpl {
 
             File[] files = dir.listFiles();
 
-            for (File file : files) { file.delete(); }
-        } catch (Exception npe){
+            for (File file : files) {
+                file.delete();
+            }
+        } catch (Exception npe) {
             Log.w(LOG_TAG, "Missing external cache dir");
         }
     }
@@ -93,13 +100,13 @@ public class EmailComposerImpl {
      * @param ctx
      * The application context.
      */
-    public boolean[] canSendMail (String id, Context ctx) {
+    public boolean[] canSendMail(String id, Context ctx) {
         // is possible with specified app
         boolean withScheme = isAppInstalled(id, ctx);
         // is possible in general
         boolean isPossible = isEmailAccountConfigured(ctx);
 
-        return new boolean[] { isPossible, withScheme };
+        return new boolean[]{isPossible, withScheme};
     }
 
     /**
@@ -113,11 +120,11 @@ public class EmailComposerImpl {
      * The resulting intent.
      * @throws JSONException
      */
-    public Intent getDraftWithProperties (JSONObject params, Context ctx)
+    public Intent getDraftWithProperties(JSONObject params, Context ctx)
             throws JSONException {
 
         Intent mail = getEmailIntent();
-        String app  = params.optString("app", null);
+        String app = params.optString("app", null);
 
         if (params.has("subject"))
             setSubject(params.getString("subject"), mail);
@@ -147,7 +154,7 @@ public class EmailComposerImpl {
      * @param draft
      * The intent to send.
      */
-    private void setSubject (String subject, Intent draft) {
+    private void setSubject(String subject, Intent draft) {
         draft.putExtra(Intent.EXTRA_SUBJECT, subject);
     }
 
@@ -161,7 +168,7 @@ public class EmailComposerImpl {
      * @param draft
      * The intent to send.
      */
-    private void setBody (String body, Boolean isHTML, Intent draft) {
+    private void setBody(String body, Boolean isHTML, Intent draft) {
         CharSequence text = isHTML ? Html.fromHtml(body) : body;
 
         draft.putExtra(Intent.EXTRA_TEXT, text);
@@ -176,7 +183,7 @@ public class EmailComposerImpl {
      * The intent to send.
      * @throws JSONException
      */
-    private void setRecipients (JSONArray recipients, Intent draft) throws JSONException {
+    private void setRecipients(JSONArray recipients, Intent draft) throws JSONException {
         String[] receivers = new String[recipients.length()];
 
         for (int i = 0; i < recipients.length(); i++) {
@@ -195,7 +202,7 @@ public class EmailComposerImpl {
      * The intent to send.
      * @throws JSONException
      */
-    private void setCcRecipients (JSONArray recipients, Intent draft) throws JSONException {
+    private void setCcRecipients(JSONArray recipients, Intent draft) throws JSONException {
         String[] receivers = new String[recipients.length()];
 
         for (int i = 0; i < recipients.length(); i++) {
@@ -214,7 +221,7 @@ public class EmailComposerImpl {
      * The intent to send.
      * @throws JSONException
      */
-    private void setBccRecipients (JSONArray recipients, Intent draft) throws JSONException {
+    private void setBccRecipients(JSONArray recipients, Intent draft) throws JSONException {
         String[] receivers = new String[recipients.length()];
 
         for (int i = 0; i < recipients.length(); i++) {
@@ -235,8 +242,8 @@ public class EmailComposerImpl {
      * The application context.
      * @throws JSONException
      */
-    private void setAttachments (JSONArray attachments, Intent draft,
-                                 Context ctx) throws JSONException {
+    private void setAttachments(JSONArray attachments, Intent draft,
+                                Context ctx) throws JSONException {
 
         ArrayList<Uri> uris = new ArrayList<Uri>();
 
@@ -250,8 +257,8 @@ public class EmailComposerImpl {
             return;
 
         draft.setAction(Intent.ACTION_SEND_MULTIPLE)
-             .setType("message/rfc822")
-             .putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                .setType("message/rfc822")
+                .putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
     }
 
     /**
@@ -264,7 +271,7 @@ public class EmailComposerImpl {
      * @return
      * The URI pointing to the given path.
      */
-    private Uri getUriForPath (String path, Context ctx) {
+    private Uri getUriForPath(String path, Context ctx) {
         if (path.startsWith("res:")) {
             return getUriForResourcePath(path, ctx);
         } else if (path.startsWith("file:///")) {
@@ -286,9 +293,9 @@ public class EmailComposerImpl {
      * @return
      * The URI pointing to the given path.
      */
-    private Uri getUriForAbsolutePath (String path) {
+    private Uri getUriForAbsolutePath(String path) {
         String absPath = path.replaceFirst("file://", "");
-        File file      = new File(absPath);
+        File file = new File(absPath);
 
         if (!file.exists()) {
             Log.e(LOG_TAG, "File not found: " + file.getAbsolutePath());
@@ -308,18 +315,18 @@ public class EmailComposerImpl {
      * The URI pointing to the given path.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private Uri getUriForAssetPath (String path, Context ctx) {
-        String resPath  = path.replaceFirst("file:/", "www");
+    private Uri getUriForAssetPath(String path, Context ctx) {
+        String resPath = path.replaceFirst("file:/", "www");
         String fileName = resPath.substring(resPath.lastIndexOf('/') + 1);
-        File dir        = ctx.getExternalCacheDir();
+        File dir = ctx.getExternalCacheDir();
 
         if (dir == null) {
             Log.e(LOG_TAG, "Missing external cache dir");
             return Uri.EMPTY;
         }
 
-        String storage  = dir.toString() + ATTACHMENT_FOLDER;
-        File file       = new File(storage, fileName);
+        String storage = dir.toString() + ATTACHMENT_FOLDER;
+        File file = new File(storage, fileName);
 
         new File(storage).mkdir();
 
@@ -329,7 +336,7 @@ public class EmailComposerImpl {
             AssetManager assets = ctx.getAssets();
 
             outStream = new FileOutputStream(file);
-            InputStream inputStream    = assets.open(resPath);
+            InputStream inputStream = assets.open(resPath);
 
             copyFile(inputStream, outStream);
             outStream.flush();
@@ -357,21 +364,21 @@ public class EmailComposerImpl {
      * The URI pointing to the given path
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private Uri getUriForResourcePath (String path, Context ctx) {
-        String resPath   = path.replaceFirst("res://", "");
-        String fileName  = resPath.substring(resPath.lastIndexOf('/') + 1);
-        String resName   = fileName.substring(0, fileName.lastIndexOf('.'));
+    private Uri getUriForResourcePath(String path, Context ctx) {
+        String resPath = path.replaceFirst("res://", "");
+        String fileName = resPath.substring(resPath.lastIndexOf('/') + 1);
+        String resName = fileName.substring(0, fileName.lastIndexOf('.'));
         String extension = resPath.substring(resPath.lastIndexOf('.'));
-        File dir         = ctx.getExternalCacheDir();
+        File dir = ctx.getExternalCacheDir();
 
         if (dir == null) {
             Log.e(LOG_TAG, "Missing external cache dir");
             return Uri.EMPTY;
         }
 
-        String storage   = dir.toString() + ATTACHMENT_FOLDER;
-        int resId        = getResId(resPath, ctx);
-        File file        = new File(storage, resName + extension);
+        String storage = dir.toString() + ATTACHMENT_FOLDER;
+        int resId = getResId(resPath, ctx);
+        File file = new File(storage, resName + extension);
 
         if (resId == 0) {
             Log.e(LOG_TAG, "File not found: " + resPath);
@@ -384,7 +391,7 @@ public class EmailComposerImpl {
         try {
             Resources res = ctx.getResources();
             outStream = new FileOutputStream(file);
-            InputStream inputStream    = res.openRawResource(resId);
+            InputStream inputStream = res.openRawResource(resId);
 
             copyFile(inputStream, outStream);
             outStream.flush();
@@ -411,10 +418,10 @@ public class EmailComposerImpl {
      * The URI including the given content.
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private Uri getUriForBase64Content (String content, Context ctx) {
+    private Uri getUriForBase64Content(String content, Context ctx) {
         String resName = content.substring(content.indexOf(":") + 1, content.indexOf("//"));
         String resData = content.substring(content.indexOf("//") + 2);
-        File dir       = ctx.getExternalCacheDir();
+        File dir = ctx.getExternalCacheDir();
         byte[] bytes;
 
         try {
@@ -430,7 +437,7 @@ public class EmailComposerImpl {
         }
 
         String storage = dir.toString() + ATTACHMENT_FOLDER;
-        File file      = new File(storage, resName);
+        File file = new File(storage, resName);
 
         new File(storage).mkdir();
 
@@ -461,7 +468,7 @@ public class EmailComposerImpl {
      * @param out
      * The output stream.
      */
-    private void copyFile (InputStream in, OutputStream out) throws IOException {
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
 
@@ -478,16 +485,16 @@ public class EmailComposerImpl {
      * @return
      * The resource ID for the given resource.
      */
-    private int getResId (String resPath, Context ctx) {
+    private int getResId(String resPath, Context ctx) {
         Resources res = ctx.getResources();
         int resId;
 
-        String pkgName  = ctx.getPackageName();
-        String dirName  = "drawable";
+        String pkgName = ctx.getPackageName();
+        String dirName = "drawable";
         String fileName = resPath;
 
         if (resPath.contains("/")) {
-            dirName  = resPath.substring(0, resPath.lastIndexOf('/'));
+            dirName = resPath.substring(0, resPath.lastIndexOf('/'));
             fileName = resPath.substring(resPath.lastIndexOf('/') + 1);
         }
 
@@ -510,12 +517,12 @@ public class EmailComposerImpl {
      * @return
      * true if available, otherwise false
      */
-    private boolean isEmailAccountConfigured (Context ctx) {
-        AccountManager am  = AccountManager.get(ctx);
+    private boolean isEmailAccountConfigured(Context ctx) {
+        AccountManager am = AccountManager.get(ctx);
 
         try {
             for (Account account : am.getAccounts()) {
-                if (account.type.endsWith("mail")) {
+                if (account.type.endsWith("mail") || account.type.endsWith("com.google")) {
                     return true;
                 }
             }
@@ -590,5 +597,4 @@ public class EmailComposerImpl {
 
         return false;
     }
-
 }
