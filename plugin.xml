@@ -24,7 +24,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-email-composer"
-        version="0.8.5">
+        version="0.8.6">
 
     <name>EmailComposer</name>
 
@@ -79,13 +79,23 @@
     <!-- android -->
     <platform name="android">
 
-        <framework src="com.android.support:support-v4:+" />
-
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="EmailComposer">
                 <param name="android-package"
                        value="de.appplant.cordova.emailcomposer.EmailComposer"/>
             </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="application">
+          <provider
+              android:name="android.support.v4.content.FileProvider"
+              android:authorities="${applicationId}.provider"
+              android:exported="false"
+              android:grantUriPermissions="true" >
+              <meta-data
+                  android:name="android.support.FILE_PROVIDER_PATHS"
+                  android:resource="@xml/provider_paths"/>
+          </provider>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
@@ -99,6 +109,10 @@
         <source-file
             src="src/android/EmailComposerImpl.java"
             target-dir="src/de/appplant/cordova/emailcomposer" />
+
+        <source-file src="src/android/xml/provider_paths.xml" target-dir="res/xml" />
+
+        <framework src="com.android.support:support-v4:24.1.1+" />
 
     </platform>
 
@@ -124,6 +138,17 @@
             src="src/android/EmailComposerImpl.java"
             target-dir="src/de/appplant/cordova/emailcomposer" />
 
+    </platform>
+
+    <!-- wp8 -->
+    <platform name="wp8">
+        <config-file target="config.xml" parent="/*">
+        <feature name="EmailComposer">
+            <param name="wp-package" value="EmailComposer"/>
+        </feature>
+        </config-file>
+        <source-file src="src/wp8/EmailComposer.cs"/>
+        <source-file src="src/wp8/Options.cs"/>
     </platform>
 
     <!-- windows -->

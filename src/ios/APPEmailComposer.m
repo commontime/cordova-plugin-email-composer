@@ -1,5 +1,5 @@
 /*
- Copyright 2013-2016 appPlant UG
+ Copyright 2013-2014 appPlant UG
 
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -25,6 +25,7 @@
 #ifndef __CORDOVA_4_0_0
     #import <Cordova/NSData+Base64.h>
 #endif
+#import <MessageUI/MFMailComposeViewController.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 
 #include "TargetConditionals.h"
@@ -62,7 +63,10 @@
 - (void) isAvailable:(CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
-        NSString* scheme = command.arguments[0];
+        NSString* scheme = @"mailto";
+        if (!command.arguments || command.arguments.count >= 1){
+          scheme =  command.arguments[0];
+        }
         NSArray* boolArray = [_impl canSendMail:scheme];
         CDVPluginResult* result;
 
@@ -87,6 +91,9 @@
     _command = command;
 
     [self.commandDelegate runInBackground:^{
+        if (![props objectForKey:@"app"]) {
+            [props setValue:@"mailto" forKey:@"app"];
+        }
         NSString* scheme = [props objectForKey:@"app"];
 
         if (![self canUseAppleMail:scheme]) {
@@ -165,7 +172,7 @@
  */
 - (BOOL) canUseAppleMail:(NSString*) scheme
 {
-    return [scheme hasPrefix:@"mailto"];
+    return [MFMailComposeViewController canSendMail] && [scheme hasPrefix:@"mailto"];
 }
 
 /**
