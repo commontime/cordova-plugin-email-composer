@@ -114,7 +114,7 @@
             src="src/android/FileProvider.java"
             target-dir="src/de/appplant/cordova/emailcomposer" />
 
-        <source-file src="src/android/xml/emailcomposer_provider_paths.xml" target-dir="res/xml/emailcomposer_provider_paths.xml" />
+        <source-file src="src/android/xml/emailcomposer_provider_paths.xml" target-dir="res/xml" />
 
         <framework src="com.android.support:support-v4:24.1.1+" />
 
