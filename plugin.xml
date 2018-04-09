@@ -88,13 +88,13 @@
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
           <provider
-              android:name="android.support.v4.content.FileProvider"
-              android:authorities="${applicationId}.provider"
+              android:name="ade.appplant.cordova.emailcomposer.FileProvider"
+              android:authorities="cordova.emailcomposer.provider"
               android:exported="false"
               android:grantUriPermissions="true" >
               <meta-data
                   android:name="android.support.FILE_PROVIDER_PATHS"
-                  android:resource="@xml/emailcomposer/provider_paths"/>
+                  android:resource="@xml/emailcomposer_provider_paths"/>
           </provider>
         </config-file>
 
@@ -110,7 +110,11 @@
             src="src/android/EmailComposerImpl.java"
             target-dir="src/de/appplant/cordova/emailcomposer" />
 
-        <source-file src="src/android/xml/provider_paths.xml" target-dir="res/xml/emailcomposer/provider_paths.xml" />
+        <source-file
+            src="src/android/FileProvider.java"
+            target-dir="src/de/appplant/cordova/emailcomposer" />
+
+        <source-file src="src/android/xml/emailcomposer_provider_paths.xml" target-dir="res/xml/emailcomposer_provider_paths.xml" />
 
         <framework src="com.android.support:support-v4:24.1.1+" />
 
