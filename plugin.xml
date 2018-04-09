@@ -94,7 +94,7 @@
               android:grantUriPermissions="true" >
               <meta-data
                   android:name="android.support.FILE_PROVIDER_PATHS"
-                  android:resource="@xml/provider_paths"/>
+                  android:resource="@xml/emailcomposer/provider_paths"/>
           </provider>
         </config-file>
 
@@ -110,7 +110,7 @@
             src="src/android/EmailComposerImpl.java"
             target-dir="src/de/appplant/cordova/emailcomposer" />
 
-        <source-file src="src/android/xml/provider_paths.xml" target-dir="res/xml" />
+        <source-file src="src/android/xml/provider_paths.xml" target-dir="res/xml/emailcomposer" />
 
         <framework src="com.android.support:support-v4:24.1.1+" />
 
