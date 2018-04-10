@@ -89,7 +89,7 @@
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
           <provider
               android:name="de.appplant.cordova.emailcomposer.FileProvider"
-              android:authorities="cordova.emailcomposer.provider"
+              android:authorities="${applicationId}.emailcomposer.provider"
               android:exported="false"
               android:grantUriPermissions="true" >
               <meta-data
