@@ -67,6 +67,11 @@ public class EmailComposerImpl {
     static private final String ATTACHMENT_FOLDER = "/email_composer";
 
     /**
+     * Authority ID to add onto the end of the package name.
+     */
+    private final String PROVIDER_AUTHORITY_SUFFIX = ".emailcomposer.provider";
+
+    /**
      * Cleans the attachment folder.
      *
      * @param ctx
@@ -310,7 +315,7 @@ public class EmailComposerImpl {
             Log.e(LOG_TAG, "File not found: " + file.getAbsolutePath());
         }
 
-        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + ".provider", file);
+        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + PROVIDER_AUTHORITY_SUFFIX, file);
     }
 
     /**
@@ -359,7 +364,7 @@ public class EmailComposerImpl {
             }
         }
 
-        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + ".provider", file);
+        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + PROVIDER_AUTHORITY_SUFFIX, file);
     }
 
     /**
@@ -413,7 +418,7 @@ public class EmailComposerImpl {
             }
         }
 
-        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + ".provider", file);
+        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + PROVIDER_AUTHORITY_SUFFIX, file);
     }
 
     /**
@@ -466,7 +471,7 @@ public class EmailComposerImpl {
             }
         }
 
-        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + ".provider", file);
+        return FileProvider.getUriForFile(ctx, ctx.getApplicationContext().getPackageName() + PROVIDER_AUTHORITY_SUFFIX, file);
     }
 
     /**
